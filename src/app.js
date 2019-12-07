@@ -14,7 +14,7 @@ const button2 = document.getElementById('button2')
 
 button.addEventListener('click', function (e) {
   socket.emit('click')
-  console.log('hiya')
+  console.log('click')
 })
 
 button2.addEventListener('click', function (e) {
