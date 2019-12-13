@@ -4,7 +4,7 @@ var app = require('http').createServer(handler),
    five = require('johnny-five');
 const {Board, Servo} = require("johnny-five");
 app.listen(8080)
-
+const controller = 'PCA9685'
 function handler (req, res) {
   fs.readFile(__dirname + '/index.html',
   function (err, data) {
@@ -45,23 +45,40 @@ board.on("ready", function() {
   // })
 
   var servo = new five.Servo({
-    id: "MyServo",     // User defined id
-    pin: 10,           // Which pin is it attached to?
+    controller,
+    id: "MyServo",
+    address: 0x40,
+        // User defined id
+    pin: 0,           // Which pin is it attached to?
     type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
     range: [0,180],    // Default: 0-180
     fps: 100,          // Used to calculate rate of movement between positions
     invert: false,     // Invert all specified positions
     startAt: 90,       // Immediately move to a degree
-    //center: true,      // overrides startAt if true and moves the servo to the center of the range
+    center: true,      // overrides startAt if true and moves the servo to the center of the range
   });
-  board.repl.inject({
-   servo
- })
+ //  board.repl.inject({
+ //   servo
+ // })
+
+ var servo2 = new five.Servo({
+   controller,
+   id: "MyServo",
+   address: 0x40,
+       // User defined id
+   pin: 11,           // Which pin is it attached to?
+   type: "standard",  // Default: "standard". Use "continuous" for continuous rotation servos
+   range: [0,180],    // Default: 0-180
+   fps: 100,          // Used to calculate rate of movement between positions
+   invert: false,     // Invert all specified positions
+   startAt: 90,       // Immediately move to a degree
+   center: true,      // overrides startAt if true and moves the servo to the center of the range
+ });
 
 
  io.sockets.on('connection', function (socket) {
    socket.on('click', function () {
-     //console.log(servo)
+     console.log('+10')
      servo.step(+10)
    })
 
@@ -71,6 +88,49 @@ board.on("ready", function() {
    })
  })
 
+ io.sockets.on('connection', function (socket) {
+   socket.on('click3', function () {
+     console.log('+10')
+     servo2.step(+10)
+   })
+
+   socket.on('click4', function () {
+     //console.log(servo)
+     servo2.step(-10)
+   })
+ })
 
 
 })
+
+
+// const {Board, Servo} = require("johnny-five");
+// const board = new Board();
+// const controller = 'PCA9685'
+// const five = require("johnny-five");
+//
+// board.on("ready", () => {
+//   console.log("Connected");
+//   const  expander  =new five.Expander({
+//     controller: "PCA9685"
+//   });
+//   // Initialize the servo instance
+//
+//   var virtual = new five.Board.Virtual({
+//     io: expander
+//   });
+//
+//   var led = new five.Servo({
+//     pin: 0,
+//     board: virtual
+//   });
+//
+//   const servo = new Servo({
+//     controller,
+//     pin: 3
+//   })
+//
+//   led.center()
+//   servo.to(0)
+//
+// });
