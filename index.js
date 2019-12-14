@@ -2,7 +2,7 @@ var app = require('http').createServer(handler),
      io = require('socket.io').listen(app),
      fs = require('fs'),
    five = require('johnny-five');
-const {Board, Servo} = require("johnny-five");
+const {Board, Servo, Animation} = require("johnny-five");
 app.listen(8080)
 const controller = 'PCA9685'
 function handler (req, res) {
@@ -75,11 +75,29 @@ board.on("ready", function() {
    center: true,      // overrides startAt if true and moves the servo to the center of the range
  });
 
+ const animation = new Animation(servo);
+ const animation2 = new Animation(servo2);
+
+   // Enqueue an animation segment with options param
+   // See Animation example and docs for details
+
+
 
  io.sockets.on('connection', function (socket) {
    socket.on('click', function () {
      console.log('+10')
-     servo.step(+10)
+     animation.enqueue({
+       cuePoints: [0, 0.25, 0.75, 1],
+       keyFrames: [10,5,-5,20,10],
+       duration: 5000
+     });
+     // servo.step(+10)
+
+     animation2.enqueue({
+       cuePoints: [0, 0.25, 0.75, 1],
+       keyFrames: [10,5,-5,20,10],
+       duration: 5000
+     });
    })
 
    socket.on('click2', function () {
