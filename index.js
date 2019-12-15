@@ -1,8 +1,8 @@
-var app = require('http').createServer(handler),
+const app = require('http').createServer(handler),
      io = require('socket.io').listen(app),
      fs = require('fs'),
    five = require('johnny-five');
-const {Board, Servo, Animation} = require("johnny-five");
+const {Board, Servo, Animation, Servos} = require("johnny-five");
 app.listen(8080)
 const controller = 'PCA9685'
 function handler (req, res) {
@@ -18,33 +18,12 @@ function handler (req, res) {
   });
 }
 
-let board = new five.Board();
+const board = new five.Board();
 board.on("ready", function() {
 
+console.log('ready')
 
-  // let led = new five.Led(11);
-  //
-  //
-  // io.sockets.on('connection', function (socket) {
-  //   socket.on('click', function () {
-  //     console.log('clicked')
-  //     led.stop().off()
-  //   });
-  //   socket.on('click2', function () {
-  //     console.log('clicked')
-  //     led.pulse({
-  //   easing: "linear",
-  //   duration: 3000,
-  //   cuePoints: [0, 0.2, 0.4, 0.6, 0.8, 1],
-  //   keyFrames: [0, 10, 0, 50, 0, 255],
-  //   onstop() {
-  //     console.log("Animation stopped");
-  //   }
-  // });
-  //   });
-  // })
-
-  var servo = new five.Servo({
+  const servo = new five.Servo({
     controller,
     id: "MyServo",
     address: 0x40,
@@ -61,7 +40,7 @@ board.on("ready", function() {
  //   servo
  // })
 
- var servo2 = new five.Servo({
+ const servo2 = new five.Servo({
    controller,
    id: "MyServo",
    address: 0x40,
@@ -74,9 +53,11 @@ board.on("ready", function() {
    startAt: 90,       // Immediately move to a degree
    center: true,      // overrides startAt if true and moves the servo to the center of the range
  });
-
+ const both = new Servos([servo, servo2])
  const animation = new Animation(servo);
  const animation2 = new Animation(servo2);
+
+ const animation3 = new Animation(both);
 
    // Enqueue an animation segment with options param
    // See Animation example and docs for details
@@ -85,19 +66,19 @@ board.on("ready", function() {
 
  io.sockets.on('connection', function (socket) {
    socket.on('click', function () {
-     console.log('+10')
-     animation.enqueue({
-       cuePoints: [0, 0.25, 0.75, 1],
-       keyFrames: [10,5,-5,20,10],
-       duration: 5000
-     });
-     // servo.step(+10)
+     // console.log('+10')
+     // animation.enqueue({
+     //   cuePoints: [0, 0.25, 0.75, 1],
+     //   keyFrames: [10,10,-10,20,10],
+     //   duration: 5000
+     // });
+     servo.step(+10)
 
-     animation2.enqueue({
-       cuePoints: [0, 0.25, 0.75, 1],
-       keyFrames: [10,5,-5,20,10],
-       duration: 5000
-     });
+     // animation2.enqueue({
+     //   cuePoints: [0, 0.25, 0.75, 1],
+     //   keyFrames: [10,10,-10,20,10],
+     //   duration: 5000
+     // });
    })
 
    socket.on('click2', function () {
@@ -116,39 +97,34 @@ board.on("ready", function() {
      //console.log(servo)
      servo2.step(-10)
    })
+
+   socket.on('click5', function () {
+     //console.log(servo)
+     animation3.enqueue({
+    duration: 2000,
+     cuePoints: [0, 0.25, 0.5, 0.75, 1.0],
+    keyFrames: [
+       [ {degrees: 0}, {degrees: 135}, {degrees: 45}, {degrees: 180}, {degrees: 0}],
+       [ {degrees: 0}, {degrees: 135}, {degrees: 45}, {degrees: 180}, {degrees: 0}]
+
+    ]
+
+  })
+
+   })
+
+   socket.on('click5', function () {
+     //console.log(servo)
+     animation3.stop()
+
+   })
+
+
+
  })
 
 
+
+
+
 })
-
-
-// const {Board, Servo} = require("johnny-five");
-// const board = new Board();
-// const controller = 'PCA9685'
-// const five = require("johnny-five");
-//
-// board.on("ready", () => {
-//   console.log("Connected");
-//   const  expander  =new five.Expander({
-//     controller: "PCA9685"
-//   });
-//   // Initialize the servo instance
-//
-//   var virtual = new five.Board.Virtual({
-//     io: expander
-//   });
-//
-//   var led = new five.Servo({
-//     pin: 0,
-//     board: virtual
-//   });
-//
-//   const servo = new Servo({
-//     controller,
-//     pin: 3
-//   })
-//
-//   led.center()
-//   servo.to(0)
-//
-// });
